@@ -1,8 +1,3 @@
-/**
- * baseUrl
- *
- */
-
 function _req(
   method,
   options = {},
