@@ -1,3 +1,4 @@
+
 function _req(
   method,
   options = {},
@@ -26,15 +27,23 @@ function _req(
 }
 
 class _wxreq {
-  _successInterceptor = null;
-  _failInterceptor = null;
-  _requestTask = null;
-  _successDownloadFileInterceptor = null;
-  _failDownloadFileInterceptor = null;
-  _downloadTask = null;
-  _successUploadFileInterceptor = null;
-  _failUploadFileInterceptor = null;
-  _uploadTask = null;
+  tasks = {
+    request: null,
+    downloadFile: null,
+    uploadFile: null
+  }
+
+  interceptors = {
+    request: null,
+    success: null,
+    fail: null,
+    requestDownloadFile: null,
+    downloadFileSuccess: null,
+    downloadFileFail: null,
+    requestUploadFile: null,
+    uploadFileSuccess: null,
+    uploadFileFail: null,
+  }
 
   constructor(options = {}) {
     this.defaultOptions = options;
@@ -45,50 +54,39 @@ class _wxreq {
     return new _wxreq(options);
   }
 
-  setInterceptor(success, fail) {
-    this._successInterceptor = success;
-    this._failInterceptor = fail;
-  }
-
-  setDownloadFileInterceptor(success, fail) {
-    this._successDownloadFileInterceptor = success;
-    this._failDownloadFileInterceptor = fail;
-  }
-
-  setUploadFileInterceptor(success, fail) {
-    this._successUploadFileInterceptor = success;
-    this._failUploadFileInterceptor = fail;
+  setInterceptor(interceptors) {
+    this.interceptors = interceptors
   }
 
   setRequestTask = task => {
-    this._requestTask = task;
-  };
-
-  setDownloadTask = task => {
-    this._downloadTask = task;
-  };
+    this.tasks.request = task
+  }
 
   setUploadTask = task => {
-    this._uploadTask = task;
-  };
+    this.tasks.uploadFile = task
+  }
+
+  setDownloadTask = task => {
+    this.tasks.downloadFile = task
+  }
 
   getRequestTask() {
-    return this._requestTask;
+    return this.tasks.request;
   }
 
   getUploadTask() {
-    return this._downloadTask;
+    return this.tasks.uploadFile;
   }
 
-  getUploadTask() {
-    return this._uploadTask;
+  getDownloadTask() {
+    return this.tasks.downloadFile;
   }
 
   optionsHandler(options) {
     const { defaultOptions } = this;
     const { baseUrl, header } = defaultOptions;
 
-    if (baseUrl) options.url = baseUrl + url;
+    if (baseUrl) options.url = baseUrl + options.url;
     if (header) {
       options.header = options.header || {};
       options.header = Object.assign({}, header, options.header);
@@ -98,45 +96,58 @@ class _wxreq {
   }
 
   request(options = {}) {
-    const { _successInterceptor, _failInterceptor, setRequestTask } = this;
+    const { interceptors, setRequestTask } = this;
     options = this.optionsHandler(options);
+
+    if (typeof interceptors.request === 'function') {
+      options = interceptors.request(options)
+    }
+
     return _req(
       'request',
       options,
-      _successInterceptor,
-      _failInterceptor,
+      interceptors.success,
+      interceptors.fail,
       setRequestTask
     );
   }
 
   downloadFile(options) {
     const {
-      _successDownloadFileInterceptor,
-      _failDownloadFileInterceptor,
+      interceptors,
       setDownloadTask,
     } = this;
     options = this.optionsHandler(options);
+
+    if (typeof interceptors.requestDownloadFile === 'function') {
+      options = interceptors.requestDownloadFile(options)
+    }
+
     return _req(
       'downloadFile',
       options,
-      _successDownloadFileInterceptor,
-      _failDownloadFileInterceptor,
+      interceptors.downloadFileSuccess,
+      interceptors.downloadFileFail,
       setDownloadTask
     );
   }
 
   uploadFile(options) {
     const {
-      _successUploadFileInterceptor,
-      _failUploadFileInterceptor,
+      interceptors,
       setUploadTask,
     } = this;
     options = this.optionsHandler(options);
+
+    if (typeof interceptors.requestUploadFile === 'function') {
+      options = interceptors.requestUploadFile(options)
+    }
+
     return _req(
       'uploadFile',
       options,
-      _successUploadFileInterceptor,
-      _failUploadFileInterceptor,
+      interceptors.uploadFileSuccess,
+      interceptors.downloadFileFail,
       setUploadTask
     );
   }
@@ -156,7 +167,7 @@ class _wxreq {
       'trace',
       'connect',
     ].forEach(method => {
-      this[method] = _request;
+      this[method] = this._request;
     });
   }
 }
