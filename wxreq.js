@@ -1,4 +1,3 @@
-
 function _req(
   method,
   options = {},
@@ -10,17 +9,17 @@ function _req(
     const task = wx[method]({
       ...options,
       success(...args) {
-        if (typeof successInterceptor === 'function') {
+        if (typeof successInterceptor === "function") {
           return resolve(successInterceptor(...args));
         }
         resolve(...args);
       },
       fail(...args) {
-        if (typeof failInterceptor === 'function') {
+        if (typeof failInterceptor === "function") {
           return reject(failInterceptor(...args));
         }
         reject(...args);
-      },
+      }
     });
     setTask(task);
   });
@@ -31,7 +30,7 @@ class _wxreq {
     request: null,
     downloadFile: null,
     uploadFile: null
-  }
+  };
 
   interceptors = {
     request: null,
@@ -42,8 +41,8 @@ class _wxreq {
     downloadFileFail: null,
     requestUploadFile: null,
     uploadFileSuccess: null,
-    uploadFileFail: null,
-  }
+    uploadFileFail: null
+  };
 
   constructor(options = {}) {
     this.defaultOptions = options;
@@ -55,20 +54,20 @@ class _wxreq {
   }
 
   setInterceptor(interceptors) {
-    this.interceptors = interceptors
+    this.interceptors = Object.assign(this.interceptors, interceptors);
   }
 
   setRequestTask = task => {
-    this.tasks.request = task
-  }
+    this.tasks.request = task;
+  };
 
   setUploadTask = task => {
-    this.tasks.uploadFile = task
-  }
+    this.tasks.uploadFile = task;
+  };
 
   setDownloadTask = task => {
-    this.tasks.downloadFile = task
-  }
+    this.tasks.downloadFile = task;
+  };
 
   getRequestTask() {
     return this.tasks.request;
@@ -83,8 +82,7 @@ class _wxreq {
   }
 
   optionsHandler(options) {
-    const { defaultOptions } = this;
-    const { baseUrl, header } = defaultOptions;
+    const { baseUrl, header } = this.defaultOptions;
 
     if (baseUrl) options.url = baseUrl + options.url;
     if (header) {
@@ -92,19 +90,19 @@ class _wxreq {
       options.header = Object.assign({}, header, options.header);
     }
 
-    return Object.assign({}, defaultOptions, options);
+    return options;
   }
 
   request(options = {}) {
     const { interceptors, setRequestTask } = this;
     options = this.optionsHandler(options);
 
-    if (typeof interceptors.request === 'function') {
-      options = interceptors.request(options)
+    if (typeof interceptors.request === "function") {
+      options = interceptors.request(options);
     }
 
     return _req(
-      'request',
+      "request",
       options,
       interceptors.success,
       interceptors.fail,
@@ -113,18 +111,15 @@ class _wxreq {
   }
 
   downloadFile(options) {
-    const {
-      interceptors,
-      setDownloadTask,
-    } = this;
+    const { interceptors, setDownloadTask } = this;
     options = this.optionsHandler(options);
 
-    if (typeof interceptors.requestDownloadFile === 'function') {
-      options = interceptors.requestDownloadFile(options)
+    if (typeof interceptors.requestDownloadFile === "function") {
+      options = interceptors.requestDownloadFile(options);
     }
 
     return _req(
-      'downloadFile',
+      "downloadFile",
       options,
       interceptors.downloadFileSuccess,
       interceptors.downloadFileFail,
@@ -133,18 +128,15 @@ class _wxreq {
   }
 
   uploadFile(options) {
-    const {
-      interceptors,
-      setUploadTask,
-    } = this;
+    const { interceptors, setUploadTask } = this;
     options = this.optionsHandler(options);
 
-    if (typeof interceptors.requestUploadFile === 'function') {
-      options = interceptors.requestUploadFile(options)
+    if (typeof interceptors.requestUploadFile === "function") {
+      options = interceptors.requestUploadFile(options);
     }
 
     return _req(
-      'uploadFile',
+      "uploadFile",
       options,
       interceptors.uploadFileSuccess,
       interceptors.downloadFileFail,
@@ -158,14 +150,14 @@ class _wxreq {
 
   setUp() {
     [
-      'get',
-      'post',
-      'put',
-      'delete',
-      'head',
-      'options',
-      'trace',
-      'connect',
+      "get",
+      "post",
+      "put",
+      "delete",
+      "head",
+      "options",
+      "trace",
+      "connect"
     ].forEach(method => {
       this[method] = this._request;
     });
