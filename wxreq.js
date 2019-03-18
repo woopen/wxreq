@@ -9,17 +9,17 @@ function _req(
     const task = wx[method]({
       ...options,
       success(...args) {
-        if (typeof successInterceptor === "function") {
+        if (typeof successInterceptor === 'function') {
           return resolve(successInterceptor(...args));
         }
         resolve(...args);
       },
       fail(...args) {
-        if (typeof failInterceptor === "function") {
+        if (typeof failInterceptor === 'function') {
           return reject(failInterceptor(...args));
         }
         reject(...args);
-      }
+      },
     });
     setTask(task);
   });
@@ -29,7 +29,7 @@ class _wxreq {
   tasks = {
     request: null,
     downloadFile: null,
-    uploadFile: null
+    uploadFile: null,
   };
 
   interceptors = {
@@ -41,7 +41,7 @@ class _wxreq {
     downloadFileFail: null,
     requestUploadFile: null,
     uploadFileSuccess: null,
-    uploadFileFail: null
+    uploadFileFail: null,
   };
 
   constructor(options = {}) {
@@ -82,12 +82,16 @@ class _wxreq {
   }
 
   optionsHandler(options) {
-    const { baseUrl, header } = this.defaultOptions;
+    const { baseUrl, header, data } = this.defaultOptions;
 
     if (baseUrl) options.url = baseUrl + options.url;
     if (header) {
       options.header = options.header || {};
       options.header = Object.assign({}, header, options.header);
+    }
+    if (data) {
+      options.data = options.data || {};
+      options.data = Object.assign({}, data, options.data);
     }
 
     return options;
@@ -97,12 +101,12 @@ class _wxreq {
     const { interceptors, setRequestTask } = this;
     options = this.optionsHandler(options);
 
-    if (typeof interceptors.request === "function") {
+    if (typeof interceptors.request === 'function') {
       options = interceptors.request(options);
     }
 
     return _req(
-      "request",
+      'request',
       options,
       interceptors.success,
       interceptors.fail,
@@ -114,12 +118,12 @@ class _wxreq {
     const { interceptors, setDownloadTask } = this;
     options = this.optionsHandler(options);
 
-    if (typeof interceptors.requestDownloadFile === "function") {
+    if (typeof interceptors.requestDownloadFile === 'function') {
       options = interceptors.requestDownloadFile(options);
     }
 
     return _req(
-      "downloadFile",
+      'downloadFile',
       options,
       interceptors.downloadFileSuccess,
       interceptors.downloadFileFail,
@@ -131,12 +135,12 @@ class _wxreq {
     const { interceptors, setUploadTask } = this;
     options = this.optionsHandler(options);
 
-    if (typeof interceptors.requestUploadFile === "function") {
+    if (typeof interceptors.requestUploadFile === 'function') {
       options = interceptors.requestUploadFile(options);
     }
 
     return _req(
-      "uploadFile",
+      'uploadFile',
       options,
       interceptors.uploadFileSuccess,
       interceptors.downloadFileFail,
@@ -150,14 +154,14 @@ class _wxreq {
 
   setUp() {
     [
-      "get",
-      "post",
-      "put",
-      "delete",
-      "head",
-      "options",
-      "trace",
-      "connect"
+      'get',
+      'post',
+      'put',
+      'delete',
+      'head',
+      'options',
+      'trace',
+      'connect',
     ].forEach(method => {
       this[method] = this._request;
     });
